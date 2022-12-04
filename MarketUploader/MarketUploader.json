@@ -1,0 +1,12 @@
+{
+  "Author": "Zhyra",
+  "Name": "Market Uploader",
+  "Punchline": "Uploads market data to various aggregators.",
+  "Description": "Help the community by uploading market data using this plugin!",
+  "InternalName": "MarketUploader",
+  "ApplicableVersion": "any",
+  "Tags": [
+    "market",
+    "uploader"
+  ]
+}
