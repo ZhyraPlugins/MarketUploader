@@ -1,12 +1,15 @@
 {
-  "Author": "Zhyra",
-  "Name": "Market Uploader",
-  "Punchline": "Uploads market data to various aggregators.",
-  "Description": "Help the community by uploading market data using this plugin!",
-  "InternalName": "MarketUploader",
-  "ApplicableVersion": "any",
-  "Tags": [
-    "market",
-    "uploader"
-  ]
+    "Author": "Zhyra",
+    "Name": "Market Uploader",
+    "Punchline": "Uploads market data to various aggregators.",
+    "Description": "Help the community by uploading market data using this plugin!",
+    "RepoUrl": "https://github.com/ZhyraPlugins/MarketUploader",
+    "IconUrl": "https://raw.githubusercontent.com/ZhyraPlugins/MarketUploader/master/MarketUploader/images/icon.png",
+    "InternalName": "MarketUploader",
+    "DalamudApiLevel": 7,
+    "ApplicableVersion": "any",
+    "Tags": [
+        "market",
+        "uploader"
+    ]
 }

@@ -15,7 +15,7 @@ namespace MarketUploader.Uploaders.XivHub
 {
     public class XivHubUploader : IMarketBoardUploader
     {
-        private HttpClient httpClient = new HttpClient();
+        private HttpClient httpClient = new();
 
         public XivHubUploader()
         {

@@ -27,6 +27,8 @@ public class MainWindow : Window, IDisposable
 
     public override void Draw()
     {
+        ImGui.TextWrapped("While having this plugin enabled, you will automatically upload data from the market board to the configured aggregators.");
+        ImGui.Spacing();
         ImGui.Text($"Total uploads: {this.plugin.Configuration.UploadCount}");
     }
 }

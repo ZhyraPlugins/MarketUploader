@@ -26,6 +26,7 @@ public class ConfigWindow : Window, IDisposable
 
     public override void Draw()
     {
+        ImGui.TextWrapped("While having this plugin enabled, you will automatically upload data from the market board to the listed aggregators.");
         ImGui.Text("Aggregators:");
 
         for (var i = 0; i < this.configuration.Aggregators.Count; i++)
