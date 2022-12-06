@@ -21,13 +21,13 @@ namespace MarketUploader
 {
     public sealed class Plugin : IDalamudPlugin
     {
-        public string Name => "XivHubMarket";
+        public string Name => "MarketUploader";
         private const string CommandName = "/xivmarket";
 
         private DalamudPluginInterface PluginInterface { get; init; }
         private CommandManager CommandManager { get; init; }
         public Configuration Configuration { get; init; }
-        public WindowSystem WindowSystem = new("XivHubMarket");
+        public WindowSystem WindowSystem = new("MarketUploader");
 
         public GameNetwork Network;
         public DataManager DataManager;
