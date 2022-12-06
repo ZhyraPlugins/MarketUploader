@@ -15,16 +15,17 @@ namespace MarketUploader.Uploaders.XivHub
 {
     public class XivHubUploader : IMarketBoardUploader
     {
-        private const string ApiBase = "http://localhost:3000";
+        private HttpClient httpClient = new HttpClient();
 
         public XivHubUploader()
         {
-
+            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("MarketUploader/1.0.0");
+            httpClient.Timeout = TimeSpan.FromSeconds(4);
         }
 
-        public async Task Upload(MarketBoardItemRequest request, ClientState clientState)
+        public async Task Upload(string baseUrl, MarketBoardItemRequest request, ClientState clientState)
         {
-            PluginLog.Verbose("Starting XivHub upload.");
+            PluginLog.Verbose($"Starting XivHub based upload to {baseUrl}");
             var uploader = clientState.LocalContentId;
 
             // ====================================================================================
@@ -70,8 +71,8 @@ namespace MarketUploader.Uploaders.XivHub
             }
 
             var listingUpload = JsonConvert.SerializeObject(listingsUploadObject);
-            PluginLog.Verbose($"Uploading: {listingUpload}");
-            await Util.HttpClient.PostAsync($"{ApiBase}/upload", new StringContent(listingUpload, Encoding.UTF8, "application/json"));
+            PluginLog.Verbose($"Uploading ({baseUrl}): {listingUpload}");
+            await httpClient.PostAsync($"{baseUrl}/upload", new StringContent(listingUpload, Encoding.UTF8, "application/json"));
 
             // ==========
 
@@ -97,16 +98,16 @@ namespace MarketUploader.Uploaders.XivHub
             }
 
             var historyUpload = JsonConvert.SerializeObject(historyUploadObject);
-            PluginLog.Verbose($"Upload history: {historyUpload}");
-            await Util.HttpClient.PostAsync($"{ApiBase}/history", new StringContent(historyUpload, Encoding.UTF8, "application/json"));
+            PluginLog.Verbose($"Upload history ({baseUrl}): {historyUpload}");
+            await httpClient.PostAsync($"{baseUrl}/history", new StringContent(historyUpload, Encoding.UTF8, "application/json"));
         }
 
-        public async Task UploadPurchase(MarketBoardPurchaseHandler purchaseHandler, ClientState clientState)
+        public async Task UploadPurchase(string baseUrl, MarketBoardPurchaseHandler purchaseHandler, ClientState clientState)
         {
             //throw new NotImplementedException();
         }
 
-        public async Task UploadTax(MarketTaxRates taxRates, ClientState clientState)
+        public async Task UploadTax(string baseUrl, MarketTaxRates taxRates, ClientState clientState)
         {
             //throw new NotImplementedException();
         }

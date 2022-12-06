@@ -36,7 +36,7 @@ namespace MarketUploader
         private readonly List<MarketBoardItemRequest> marketBoardRequests = new();
         private MarketBoardPurchaseHandler? marketBoardPurchaseHandler;
 
-        private readonly List<IMarketBoardUploader> marketBoardUploaders= new();
+        private readonly List<IMarketBoardUploader> marketBoardUploaders = new();
 
         public Plugin(
             [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
@@ -55,12 +55,8 @@ namespace MarketUploader
             this.Configuration = this.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
             this.Configuration.Initialize(this.PluginInterface);
 
-            // you might normally want to embed resources and load them from the manifest stream
-            var imagePath = Path.Combine(PluginInterface.AssemblyLocation.Directory?.FullName!, "goat.png");
-            var goatImage = this.PluginInterface.UiBuilder.LoadImage(imagePath);
-
             WindowSystem.AddWindow(new ConfigWindow(this));
-            WindowSystem.AddWindow(new MainWindow(this, goatImage));
+            WindowSystem.AddWindow(new MainWindow(this));
 
             this.CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
             {
@@ -103,6 +99,7 @@ namespace MarketUploader
                 return;
 
             }
+
             if (opCode == DataManager.ServerOpCodes["MarketBoardOfferings"])
             {
                 var listing = MarketBoardCurrentOfferings.Read(dataPtr);
@@ -149,21 +146,28 @@ namespace MarketUploader
                     request.AmountToArrive,
                     request.CatalogId);
 
-                if (request.IsDone)
+                if (request.IsDone && !request.Uploaded)
                 {
+                    request.Uploaded = true;
                     PluginLog.Verbose(
                         "Market Board request finished, starting upload: request#{0} item#{1} amount#{2}",
                         request.ListingsRequestId,
                         request.CatalogId,
                         request.AmountToArrive);
 
-                    
-                    foreach(IMarketBoardUploader uploader in marketBoardUploaders) {
-                        Task.Run(() => uploader.Upload(request, ClientState))
-                        .ContinueWith((task) => PluginLog.Error(task.Exception, "Market Board offerings data upload failed."), TaskContinuationOptions.OnlyOnFaulted);
+
+                    PluginLog.LogInformation("Uploading item#{0} to {1} aggregators ({2} uploader impls)", request.CatalogId, 
+                        this.Configuration.Aggregators.Count, marketBoardUploaders.Count);
+
+                    foreach(string baseUrl in this.Configuration.Aggregators)
+                    {
+                        foreach (IMarketBoardUploader uploader in marketBoardUploaders)
+                        {
+                            Task.Run(() => uploader.Upload(baseUrl, request, ClientState))
+                            .ContinueWith((task) => { Configuration.UploadCount += 1; PluginLog.Information($"Uploaded succesfully to {baseUrl}"); })
+                            .ContinueWith((task) => PluginLog.Error(task.Exception, "Market Board offerings data upload failed."), TaskContinuationOptions.OnlyOnFaulted);
+                        }
                     }
-                   
-                    
                 }
             }
 
@@ -193,10 +197,14 @@ namespace MarketUploader
                 {
                     PluginLog.Verbose("Request had 0 amount, uploading now");
 
-                    foreach (IMarketBoardUploader uploader in marketBoardUploaders)
+                    foreach (string baseUrl in this.Configuration.Aggregators)
                     {
-                        Task.Run(() => uploader.Upload(request, ClientState))
-                        .ContinueWith((task) => PluginLog.Error(task.Exception, "Market Board history data upload failed."), TaskContinuationOptions.OnlyOnFaulted);
+                        foreach (IMarketBoardUploader uploader in marketBoardUploaders)
+                        {
+                            Task.Run(() => uploader.Upload(baseUrl, request, ClientState))
+                            .ContinueWith((task) => { Configuration.UploadCount += 1; PluginLog.Information($"Uploaded succesfully to {baseUrl}"); })
+                            .ContinueWith((task) => PluginLog.Error(task.Exception, "Market Board history data upload failed."), TaskContinuationOptions.OnlyOnFaulted);
+                        }
                     }
                 }
             }
@@ -252,11 +260,17 @@ namespace MarketUploader
 
                     var handler = this.marketBoardPurchaseHandler; // Capture the object so that we don't pass in a null one when the task starts.
 
-                    foreach (IMarketBoardUploader uploader in marketBoardUploaders)
+                    foreach (string baseUrl in this.Configuration.Aggregators)
                     {
-                        Task.Run(() => uploader.UploadPurchase(handler, ClientState))
-                        .ContinueWith((task) => PluginLog.Error(task.Exception, "Market Board purchase data upload failed."), TaskContinuationOptions.OnlyOnFaulted);
+                        foreach (IMarketBoardUploader uploader in marketBoardUploaders)
+                        {
+                            Task.Run(() => uploader.UploadPurchase(baseUrl, handler, ClientState))
+                            .ContinueWith((task) => { Configuration.UploadCount += 1; })
+                            .ContinueWith((task) => PluginLog.Error(task.Exception, "Market Board purchase data upload failed."), TaskContinuationOptions.OnlyOnFaulted);
+                        }
                     }
+
+                    Configuration.Save();
                 }
 
                 this.marketBoardPurchaseHandler = null;
@@ -266,6 +280,7 @@ namespace MarketUploader
 
         public void Dispose()
         {
+            this.Configuration.Save();
             this.WindowSystem.RemoveAllWindows();
             this.CommandManager.RemoveHandler(CommandName);
         }
@@ -273,7 +288,7 @@ namespace MarketUploader
         private void OnCommand(string command, string args)
         {
             // in response to the slash command, just display our main ui
-            WindowSystem.GetWindow("My Amazing Window").IsOpen = true;
+            WindowSystem.GetWindow("Market Uploader").IsOpen = true;
         }
 
         private void DrawUI()
@@ -283,7 +298,7 @@ namespace MarketUploader
 
         public void DrawConfigUI()
         {
-            WindowSystem.GetWindow("A Wonderful Configuration Window").IsOpen = true;
+            WindowSystem.GetWindow("MarketUploader Configuration").IsOpen = true;
         }
     }
 }
