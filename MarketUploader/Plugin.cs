@@ -163,9 +163,12 @@ namespace MarketUploader
                     {
                         foreach (IMarketBoardUploader uploader in marketBoardUploaders)
                         {
-                            Task.Run(() => uploader.Upload(baseUrl, request, ClientState))
-                            .ContinueWith((task) => { Configuration.UploadCount += 1; PluginLog.Information($"Uploaded succesfully to {baseUrl}"); })
-                            .ContinueWith((task) => PluginLog.Error(task.Exception, "Market Board offerings data upload failed."), TaskContinuationOptions.OnlyOnFaulted);
+                            var task = Task.Run(() => uploader.Upload(baseUrl, request, ClientState));
+
+                            task.ContinueWith((task) => PluginLog.Error(task.Exception, "Market Board history data upload failed."),
+                                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.AttachedToParent);
+                            task.ContinueWith((task) => { Configuration.UploadCount += 1; PluginLog.Information($"Uploaded succesfully to {baseUrl}"); },
+                                TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.AttachedToParent);
                         }
                     }
                 }
@@ -201,9 +204,12 @@ namespace MarketUploader
                     {
                         foreach (IMarketBoardUploader uploader in marketBoardUploaders)
                         {
-                            Task.Run(() => uploader.Upload(baseUrl, request, ClientState))
-                            .ContinueWith((task) => { Configuration.UploadCount += 1; PluginLog.Information($"Uploaded succesfully to {baseUrl}"); })
-                            .ContinueWith((task) => PluginLog.Error(task.Exception, "Market Board history data upload failed."), TaskContinuationOptions.OnlyOnFaulted);
+                            var task = Task.Run(() => uploader.Upload(baseUrl, request, ClientState));
+
+                            task.ContinueWith((task) => PluginLog.Error(task.Exception, "Market Board history data upload failed."), 
+                                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.AttachedToParent);
+                            task.ContinueWith((task) => { Configuration.UploadCount += 1; PluginLog.Information($"Uploaded succesfully to {baseUrl}"); }, 
+                                TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.AttachedToParent);
                         }
                     }
                 }
@@ -264,9 +270,12 @@ namespace MarketUploader
                     {
                         foreach (IMarketBoardUploader uploader in marketBoardUploaders)
                         {
-                            Task.Run(() => uploader.UploadPurchase(baseUrl, handler, ClientState))
-                            .ContinueWith((task) => { Configuration.UploadCount += 1; })
-                            .ContinueWith((task) => PluginLog.Error(task.Exception, "Market Board purchase data upload failed."), TaskContinuationOptions.OnlyOnFaulted);
+                            var task = Task.Run(() => uploader.UploadPurchase(baseUrl, handler, ClientState));
+
+                            task.ContinueWith((task) => PluginLog.Error(task.Exception, "Market Board purchase data upload failed."), 
+                                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.AttachedToParent);
+                            task.ContinueWith((task) => { Configuration.UploadCount += 1; }, 
+                                TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.AttachedToParent);
                         }
                     }
 
@@ -280,6 +289,7 @@ namespace MarketUploader
 
         public void Dispose()
         {
+            this.Network.NetworkMessage -= OnNetworkMessage;
             this.Configuration.Save();
             this.WindowSystem.RemoveAllWindows();
             this.CommandManager.RemoveHandler(CommandName);

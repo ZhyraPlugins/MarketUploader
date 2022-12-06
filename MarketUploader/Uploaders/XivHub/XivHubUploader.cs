@@ -70,10 +70,6 @@ namespace MarketUploader.Uploaders.XivHub
                 listingsUploadObject.Listings.Add(listing);
             }
 
-            var listingUpload = JsonConvert.SerializeObject(listingsUploadObject);
-            PluginLog.Verbose($"Uploading ({baseUrl}): {listingUpload}");
-            await httpClient.PostAsync($"{baseUrl}/upload", new StringContent(listingUpload, Encoding.UTF8, "application/json"));
-
             // ==========
 
             var historyUploadObject = new HistoryUpload
@@ -96,6 +92,11 @@ namespace MarketUploader.Uploaders.XivHub
                     PurchaseTime = ((DateTimeOffset)marketBoardHistoryListing.PurchaseTime).ToUnixTimeSeconds(),
                 });
             }
+
+            // Upload
+            var listingUpload = JsonConvert.SerializeObject(listingsUploadObject);
+            PluginLog.Verbose($"Uploading ({baseUrl}): {listingUpload}");
+            await httpClient.PostAsync($"{baseUrl}/upload", new StringContent(listingUpload, Encoding.UTF8, "application/json"));
 
             var historyUpload = JsonConvert.SerializeObject(historyUploadObject);
             PluginLog.Verbose($"Upload history ({baseUrl}): {historyUpload}");
