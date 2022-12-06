@@ -4,6 +4,14 @@
 
 A plugin that uploads market data to various aggregators (that support the way this plugin uploads).
 
+----
+
+Add this repo to use this plugin and help kickstart this project with more data!:
+
+`https://raw.githubusercontent.com/ZhyraPlugins/repo/main/plugins.json`
+
+
+
 ![image](https://user-images.githubusercontent.com/15859336/205991925-e8f43805-dbee-4100-a354-56b9c290645f.png)
 
 ![image](https://user-images.githubusercontent.com/15859336/205991998-e15daeb3-e8b4-421b-8480-349276dfea2b.png)
