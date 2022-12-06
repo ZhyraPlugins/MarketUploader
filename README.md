@@ -20,3 +20,6 @@ Add this repo to use this plugin and help kickstart this project with more data!
 Mainly done to support my currently in development alternative to universalis.
 
 Part of the API side that receives data is done, for example <https://market.xivhub.org/api/item/34548>
+
+## Discord
+If you need help or want to get in contact, here is the XivHub.org discord: https://discord.gg/GZK9aME8wN
