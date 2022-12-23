@@ -33,7 +33,7 @@ namespace MarketUploader
         public DataManager DataManager;
         private ClientState ClientState;
 
-        private readonly List<MarketBoardItemRequest> marketBoardRequests = new();
+        private readonly Dictionary<uint, MarketBoardItemRequest> marketBoardRequests = new();
         private MarketBoardPurchaseHandler? marketBoardPurchaseHandler;
 
         private readonly List<IMarketBoardUploader> marketBoardUploaders = new();
@@ -93,7 +93,7 @@ namespace MarketUploader
             if (opCode == DataManager.ServerOpCodes["MarketBoardItemRequestStart"])
             {
                 var data = MarketBoardItemRequest.Read(dataPtr);
-                this.marketBoardRequests.Add(data);
+                this.marketBoardRequests.Add(data.CatalogId, data);
 
                 PluginLog.Verbose($"NEW MB REQUEST START: item#{data.CatalogId} amount#{data.AmountToArrive}");
                 return;
@@ -103,14 +103,17 @@ namespace MarketUploader
             if (opCode == DataManager.ServerOpCodes["MarketBoardOfferings"])
             {
                 var listing = MarketBoardCurrentOfferings.Read(dataPtr);
+                var catalogId = listing.ItemListings[0].CatalogId;
 
-                var request = this.marketBoardRequests.LastOrDefault(r => r.CatalogId == listing.ItemListings[0].CatalogId && !r.IsDone);
+                //var request = this.marketBoardRequests.LastOrDefault(r => r.CatalogId == listing.ItemListings[0].CatalogId && !r.IsDone);
 
-                if (request == default)
+
+                if (!this.marketBoardRequests.TryGetValue(catalogId, out var request))
                 {
                     PluginLog.Error($"Market Board data arrived without a corresponding request: item#{listing.ItemListings[0].CatalogId}");
                     return;
                 }
+
 
                 if (request.Listings.Count + listing.ItemListings.Count > request.AmountToArrive)
                 {
@@ -146,9 +149,8 @@ namespace MarketUploader
                     request.AmountToArrive,
                     request.CatalogId);
 
-                if (request.IsDone && !request.Uploaded)
+                if (request.IsDone)
                 {
-                    request.Uploaded = true;
                     PluginLog.Verbose(
                         "Market Board request finished, starting upload: request#{0} item#{1} amount#{2}",
                         request.ListingsRequestId,
@@ -171,6 +173,7 @@ namespace MarketUploader
                                 TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.AttachedToParent);
                         }
                     }
+                    this.marketBoardRequests.Remove(catalogId);
                 }
             }
 
@@ -178,9 +181,7 @@ namespace MarketUploader
             {
                 var listing = MarketBoardHistory.Read(dataPtr);
 
-                var request = this.marketBoardRequests.LastOrDefault(r => r.CatalogId == listing.CatalogId);
-
-                if (request == default)
+                if (!this.marketBoardRequests.TryGetValue(listing.CatalogId, out var request))
                 {
                     PluginLog.Error($"Market Board data arrived without a corresponding request: item#{listing.CatalogId}");
                     return;
@@ -212,6 +213,8 @@ namespace MarketUploader
                                 TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.AttachedToParent);
                         }
                     }
+
+                    this.marketBoardRequests.Remove(listing.CatalogId);
                 }
             }
 

@@ -42,8 +42,6 @@ namespace MarketUploader
         /// </summary>
         public bool IsDone => this.Listings.Count == this.AmountToArrive && this.History.Count != 0;
 
-        public bool Uploaded = false;
-
         /// <summary>
         /// Read a packet off the wire.
         /// </summary>

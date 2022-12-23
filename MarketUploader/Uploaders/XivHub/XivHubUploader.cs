@@ -2,6 +2,7 @@ using Dalamud.Game.ClientState;
 using Dalamud.Game.Network.Structures;
 using Dalamud.Logging;
 using Dalamud.Utility;
+using Lumina;
 using MarketUploader.Uploaders.XivHub.Types;
 using Newtonsoft.Json;
 using System;
@@ -40,7 +41,6 @@ namespace MarketUploader.Uploaders.XivHub
 
             foreach (var marketBoardItemListing in request.Listings)
             {
-                
                 var listing = new ItemListingsEntry
                 {
                     ListingId = marketBoardItemListing.ListingId,
@@ -96,11 +96,15 @@ namespace MarketUploader.Uploaders.XivHub
             // Upload
             var listingUpload = JsonConvert.SerializeObject(listingsUploadObject);
             PluginLog.Verbose($"Uploading ({baseUrl}): {listingUpload}");
-            await httpClient.PostAsync($"{baseUrl}/upload", new StringContent(listingUpload, Encoding.UTF8, "application/json"));
+            var res = await httpClient.PostAsync($"{baseUrl}/upload", new StringContent(listingUpload, Encoding.UTF8, "application/json"));
+            PluginLog.Verbose(res.ToString());
+            var resText = await res.Content.ReadAsStringAsync();
+            PluginLog.Verbose(resText);
 
             var historyUpload = JsonConvert.SerializeObject(historyUploadObject);
             PluginLog.Verbose($"Upload history ({baseUrl}): {historyUpload}");
-            await httpClient.PostAsync($"{baseUrl}/history", new StringContent(historyUpload, Encoding.UTF8, "application/json"));
+            var resHistory = await httpClient.PostAsync($"{baseUrl}/history", new StringContent(historyUpload, Encoding.UTF8, "application/json"));
+            PluginLog.Verbose(resHistory.ToString());
         }
 
         public async Task UploadPurchase(string baseUrl, MarketBoardPurchaseHandler purchaseHandler, ClientState clientState)

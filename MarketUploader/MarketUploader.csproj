@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Authors></Authors>
+    <Authors>Zhyra</Authors>
     <Company></Company>
     <Version>1.0.0.0</Version>
     <Description>Uploads market data to various aggregators.</Description>
