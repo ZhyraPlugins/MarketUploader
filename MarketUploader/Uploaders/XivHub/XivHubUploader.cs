@@ -20,7 +20,7 @@ namespace MarketUploader.Uploaders.XivHub
 
         public XivHubUploader()
         {
-            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("MarketUploader/1.0.1");
+            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("MarketUploader/1.0.4");
             httpClient.Timeout = TimeSpan.FromSeconds(4);
         }
 
