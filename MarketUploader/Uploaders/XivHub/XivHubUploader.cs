@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,21 +21,25 @@ namespace MarketUploader.Uploaders.XivHub
 
         public XivHubUploader()
         {
-            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("MarketUploader/1.0.4");
+            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("MarketUploader/1.0.5");
             httpClient.Timeout = TimeSpan.FromSeconds(4);
         }
 
         public async Task Upload(string baseUrl, MarketBoardItemRequest request, ClientState clientState)
         {
             PluginLog.Verbose($"Starting XivHub based upload to {baseUrl}");
-            var uploader = clientState.LocalContentId;
+
+            SHA256 hasher = SHA256.Create();
+            var uploader = hasher.ComputeHash(BitConverter.GetBytes(clientState.LocalContentId));
+            hasher.Clear();
+            var uploaderId = Convert.ToHexString(uploader);
 
             // ====================================================================================
 
             var listingsUploadObject = new ItemListingUpload
             {
                 WorldId = clientState.LocalPlayer?.CurrentWorld.Id ?? 0,
-                UploaderId = uploader.ToString(),
+                UploaderId = uploaderId,
                 ItemId = request.CatalogId,
                 Listings = new List<ItemListingsEntry>(),
             };
@@ -75,7 +80,7 @@ namespace MarketUploader.Uploaders.XivHub
             var historyUploadObject = new HistoryUpload
             {
                 WorldId = clientState.LocalPlayer?.CurrentWorld.Id ?? 0,
-                UploaderId = uploader.ToString(),
+                UploaderId = uploaderId,
                 ItemId = request.CatalogId,
                 Listings = new List<HistoryEntry>(),
             };

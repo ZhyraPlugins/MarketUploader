@@ -2,7 +2,7 @@
     "Author": "Zhyra",
     "Name": "Market Uploader",
     "Punchline": "Uploads market data to market.xivhub.org and other configurable aggregators.",
-    "Description": "Help the community by uploading market data using this plugin!",
+    "Description": "Uploads market data to market.xivhub.org and other configurable aggregators.",
     "RepoUrl": "https://github.com/ZhyraPlugins/MarketUploader",
     "IconUrl": "https://raw.githubusercontent.com/ZhyraPlugins/MarketUploader/master/MarketUploader/images/icon.png",
     "InternalName": "MarketUploader",
