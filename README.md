@@ -2,7 +2,7 @@
 
 A plugin that uploads market data to various aggregators (that support the way this plugin uploads).
 
-> Note: You can now find this plugin on the oficial dalamud plugin manager, no need for any repository!
+***Note: You can now find this plugin on the oficial dalamud plugin manager, no need for any repository!***
 
 ----
 
