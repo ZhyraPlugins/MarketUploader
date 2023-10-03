@@ -18,6 +18,11 @@ namespace MarketUploader
         public uint CatalogId { get; private set; }
 
         /// <summary>
+        /// Gets the request status. Nonzero statuses are errors.
+        /// </summary>
+        public uint Status { get; private set; }
+
+        /// <summary>
         /// Gets the amount to arrive.
         /// </summary>
         public byte AmountToArrive { get; private set; }
@@ -55,7 +60,8 @@ namespace MarketUploader
             var output = new MarketBoardItemRequest();
 
             output.CatalogId = reader.ReadUInt32();
-            stream.Position += 0x7;
+            output.Status = reader.ReadUInt32();
+            stream.Position += 0x3;
             output.AmountToArrive = reader.ReadByte();
 
             return output;
